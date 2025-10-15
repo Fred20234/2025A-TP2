@@ -20,36 +20,11 @@ def analyser_menu(menu):
     # TODO: Calculer le plat le plus rentable (ratio popularité/temps_preparation)
     # Attention: gérer le cas où temps_preparation pourrait être 0
 
-    plat_rentable = None
 
-    for plat, valeurs in menu.items():
-        if valeurs[1] != 0:
-            if plat_rentable is None or valeurs[2] / valeurs[1] > menu.get(plat_rentable)[2] / menu.get(plat_rentable[1]):
-                plat_rentable = plat
-
-    stats |= {"plat_plus_rentable": plat_rentable}
-            
     # TODO: Calculer le prix moyen du menu
 
-    prix_moyen = 0
-    for valeurs in menu.values():
-        prix_moyen += valeurs[0]
-    
-    prix_moyen /= len(menu)
-
-    stats |= {"prix_moyen": prix_moyen}
 
     # TODO: Calculer le temps de préparation moyen
-
-    temps_moyen = 0
-    for valeurs in menu.values():
-        temps_moyen += valeurs[1]
-
-    temps_moyen /= len(menu)
-
-    stats |= {"temps_moyen": temps_moyen}
-
-    return stats
 
 
 def filtrer_menu_par_categorie(menu, categories):
@@ -86,9 +61,6 @@ def calculer_profit(menu, ventes_jour):
     
     # TODO: Calculer le profit total
     # profit = somme(prix_plat * nombre_ventes) pour chaque plat vendu
-
-    for i in range(ventes_jour):
-        profit += ventes_jour
     
     return profit
 
