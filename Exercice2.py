@@ -20,6 +20,10 @@ def calculer_priorite(commande):
     # TODO: Implémenter l'algorithme de priorité
     # Score = (temps_attente × 2) + (nombre_items × 1) + (client_vip × 10)
     
+    score += commande["temps_attente"] * 2 + commande["nombre_items"]
+    if commande["client_vip"]:
+        score += 10
+
     return score
 
 
@@ -37,7 +41,18 @@ def trier_commandes(liste_commandes):
     # TODO: Implémenter un algorithme de tri (suggestion: tri à bulles)
     # Les commandes avec le score le plus élevé doivent être en premier
     
-    return liste_commandes
+    scores = []
+    for cmd in liste_commandes:
+        scores.append(calculer_priorite(cmd))
+
+    commandes_triees = liste_commandes.copy()
+    for i in range(len(scores)):
+        for j in range(len(scores) - i - 1):
+            if scores[j] < scores[j + 1]:
+                scores[j], scores[j + 1] = scores[j + 1], scores[j]
+                commandes_triees[j], commandes_triees[j + 1] = commandes_triees[j + 1], commandes_triees[j]
+
+    return commandes_triees
 
 
 def estimer_temps_total(liste_commandes_triee):
