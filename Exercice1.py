@@ -24,7 +24,7 @@ def analyser_menu(menu):
 
     for plat, valeurs in menu.items():
         if valeurs[1] != 0:
-            if plat_rentable is None or valeurs[2] / valeurs[1] > menu.get(plat_rentable)[2] / menu.get(plat_rentable[1]):
+            if plat_rentable is None or valeurs[2] / valeurs[1] > menu.get(plat_rentable)[2] / menu.get(plat_rentable)[1]:
                 plat_rentable = plat
 
     stats |= {"plat_plus_rentable": plat_rentable}
@@ -32,20 +32,22 @@ def analyser_menu(menu):
     # TODO: Calculer le prix moyen du menu
 
     prix_moyen = 0
-    for valeurs in menu.values():
-        prix_moyen += valeurs[0]
-    
-    prix_moyen /= len(menu)
+    if len(menu) != 0:
+        for valeurs in menu.values():
+            prix_moyen += valeurs[0]
+        
+        prix_moyen /= len(menu)
 
     stats |= {"prix_moyen": prix_moyen}
 
     # TODO: Calculer le temps de préparation moyen
 
     temps_moyen = 0
-    for valeurs in menu.values():
-        temps_moyen += valeurs[1]
+    if len(menu) != 0:
+        for valeurs in menu.values():
+            temps_moyen += valeurs[1]
 
-    temps_moyen /= len(menu)
+        temps_moyen /= len(menu)
 
     stats |= {"temps_moyen": temps_moyen}
 
@@ -67,7 +69,15 @@ def filtrer_menu_par_categorie(menu, categories):
     
     # TODO: Organiser les plats par catégorie
     # Exemple: {'entrées': [...], 'plats': [...], 'desserts': [...]}
-    
+
+    ordre_categories = ["entrées", "plats", "desserts"]
+
+    for i in range(len(ordre_categories)):
+        menu_filtre[ordre_categories[i]] = []
+        for plat in menu:
+            if categories.get(plat) == ordre_categories[i]:
+                menu_filtre[ordre_categories[i]].append(plat)
+
     return menu_filtre
 
 
@@ -87,8 +97,9 @@ def calculer_profit(menu, ventes_jour):
     # TODO: Calculer le profit total
     # profit = somme(prix_plat * nombre_ventes) pour chaque plat vendu
 
-    for i in range(ventes_jour):
-        profit += ventes_jour
+    for plat, valeurs in menu.items():
+        if ventes_jour.get(plat):
+            profit += valeurs[0] * ventes_jour[plat]
     
     return profit
 
