@@ -24,7 +24,7 @@ def analyser_menu(menu):
 
     for plat, valeurs in menu.items():
         if valeurs[1] != 0:
-            if plat_rentable is None or valeurs[2] / valeurs[1] > menu.get(plat_rentable)[2] / menu.get(plat_rentable)[1]:
+            if plat_rentable is None or valeurs[2] / valeurs[1] > menu[plat_rentable][2] / menu[plat_rentable][1]:
                 plat_rentable = plat
 
     stats |= {"plat_plus_rentable": plat_rentable}
@@ -75,7 +75,7 @@ def filtrer_menu_par_categorie(menu, categories):
     for i in range(len(ordre_categories)):
         menu_filtre[ordre_categories[i]] = []
         for plat in menu:
-            if categories.get(plat) == ordre_categories[i]:
+            if categories.get(plat, "") == ordre_categories[i]:
                 menu_filtre[ordre_categories[i]].append(plat)
 
     return menu_filtre
@@ -98,8 +98,7 @@ def calculer_profit(menu, ventes_jour):
     # profit = somme(prix_plat * nombre_ventes) pour chaque plat vendu
 
     for plat, valeurs in menu.items():
-        if ventes_jour.get(plat):
-            profit += valeurs[0] * ventes_jour[plat]
+        profit += valeurs[0] * ventes_jour.get(plat, 0)
     
     return profit
 
