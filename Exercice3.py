@@ -18,6 +18,11 @@ def verifier_disponibilite(inventaire, recette):
     
     # TODO: Vérifier pour chaque ingrédient de la recette
     # s'il est disponible en quantité suffisante dans l'inventaire
+
+    for ing, qté in recette.items():
+        if inventaire.get(ing, 0) < qté:
+            peut_preparer = False
+            ingredients_manquants.append(ing)
     
     return peut_preparer, ingredients_manquants
 
@@ -38,6 +43,9 @@ def mettre_a_jour_inventaire(inventaire, recette, quantite=1):
     
     # TODO: Soustraire les ingrédients utilisés de l'inventaire
     # Multiplier par la quantité si plusieurs portions
+
+    for ing, qté in recette.items():
+        nouvel_inventaire[ing] -= qté * quantite
     
     return nouvel_inventaire
 
@@ -58,6 +66,10 @@ def generer_alertes_stock(inventaire, seuil=10):
     
     # TODO: Identifier les ingrédients avec stock < seuil
     # Suggérer une quantité à commander (ex: 50 unités - stock_actuel)
+
+    for ing, qté in inventaire.items():
+        if qté < seuil:
+            alertes[ing] = (qté, max(0, quantite_standard - qté))
     
     return alertes
 
@@ -77,6 +89,13 @@ def calculer_commandes_possibles(inventaire, menu_recettes):
     
     # TODO: Pour chaque plat, calculer combien de portions peuvent être faites
     # Le minimum est déterminé par l'ingrédient le plus limitant (on pourra initialiser une variable nb_portions = infini dans un premier temps)
+
+    for recette, ings in menu_recettes.items():
+        nombre_possible = 1000
+        for ing, qté in ings.items():
+            nombre_possible = min(nombre_possible, inventaire[ing] // qté)
+
+        commandes_possibles[recette] = nombre_possible
     
     return commandes_possibles
 
@@ -100,7 +119,43 @@ def optimiser_achats(inventaire, menu_recettes, previsions_ventes, budget):
     # TODO: Calculer les besoins totaux selon les prévisions
     # Soustraire l'inventaire actuel
     # Optimiser selon le budget disponible (prioriser les ingrédients critiques)
-    
+
+    besoins_totaux = {}
+    for plat, nb_portions in previsions_ventes.items():
+        recette = menu_recettes[plat]
+        for ing, qté in recette.items():
+            besoins_totaux[ing] = besoins_totaux.get(ing, 0) + qté * nb_portions
+
+    besoins_achat = {}
+    for ing, qté_totale in besoins_totaux.items():
+        qté_dispo = inventaire.get(ing, 0)
+        qté_a_acheter = qté_totale - qté_dispo
+        if qté_a_acheter > 0:
+            besoins_achat[ing] = besoins_achat.get(ing, 0) + qté_a_acheter
+
+
+    budget_restant = budget
+    ingredients_a_acheter = list(besoins_achat.keys())
+
+    def get_cout(ing):
+        return cout_ingredients[ing]
+
+    ingredients_a_acheter.sort(key=get_cout)
+
+    for ing in ingredients_a_acheter:
+        qte_max = besoins_achat[ing]
+        cout_total = qte_max * cout_ingredients[ing]
+
+        if cout_total <= budget_restant:
+            liste_achats[ing] = qte_max
+            budget_restant -= cout_total
+        else:
+            qte_possible = int(budget_restant // cout_ingredients[ing])
+            if qte_possible > 0:
+                liste_achats[ing] = qte_possible
+                budget_restant -= qte_possible * cout_ingredients[ing]
+
+
     return liste_achats
 
 

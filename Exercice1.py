@@ -27,7 +27,7 @@ def analyser_menu(menu):
             if plat_rentable is None or valeurs[2] / valeurs[1] > menu[plat_rentable][2] / menu[plat_rentable][1]:
                 plat_rentable = plat
 
-    stats |= {"plat_plus_rentable": plat_rentable}
+    stats["plat_plus_rentable"] = plat_rentable
             
     # TODO: Calculer le prix moyen du menu
 
@@ -38,7 +38,7 @@ def analyser_menu(menu):
         
         prix_moyen /= len(menu)
 
-    stats |= {"prix_moyen": prix_moyen}
+    stats["prix_moyen"] = prix_moyen
 
     # TODO: Calculer le temps de préparation moyen
 
@@ -49,7 +49,7 @@ def analyser_menu(menu):
 
         temps_moyen /= len(menu)
 
-    stats |= {"temps_moyen": temps_moyen}
+    stats["temps_moyen"] = temps_moyen
 
     return stats
 
