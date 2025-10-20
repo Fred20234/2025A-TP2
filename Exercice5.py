@@ -32,6 +32,14 @@ def analyser_commentaire(commentaire, mots_cles):
         # D'abord, vérifier la correspondance exacte dans la liste des mots
         # Sinon, vérifier si le mot-clé est le début d'un mot du commentaire (cela permet de trouver "froid" dans "froide" ou "froids"), pour cela utiliser la méthode startswith().
     # Borner le score final entre 0 et 10
+
+    for mot in mots_commentaire:
+        for clé, score in mots_cles.items():
+            if str(mot).startswith(clé):
+                score_total += score
+                mots_trouves.append(clé)
+
+    score_total = max(0, min(score_total, 10))
     
     return score_total, mots_trouves
 
@@ -53,6 +61,15 @@ def categoriser_commentaires(liste_commentaires, mots_cles):
     # TODO: Analyser chaque commentaire
     # Catégoriser selon le score obtenu
     # Stocker le commentaire et son score dans la bonne catégorie
+
+    for commentaire in liste_commentaires:
+        score, mots = analyser_commentaire(commentaire, mots_cles)
+        if score >= 7:
+            categories["positifs"].append((commentaire, score))
+        elif 4 <= score <= 6:
+            categories["neutres"].append((commentaire, score))
+        elif score < 4:
+            categories["negatifs"].append((commentaire, score))
     
     return categories
 
@@ -73,6 +90,21 @@ def identifier_problemes(commentaires_negatifs, mots_cles_negatifs):
     # TODO: Pour chaque commentaire négatif
     # Compter le nombre d'apparition de chaque mot-clé négatif
     # Retourner un dictionnaire trié par fréquence décroissante
+
+    for commentaire in commentaires_negatifs:
+        _, mots = analyser_commentaire(commentaire, mots_cles_negatifs)
+        for mot in mots:
+            frequence_problemes[mot] = frequence_problemes.get(mot, 0) + 1
+
+    liste_problemes = list(frequence_problemes.items())
+
+    n = len(liste_problemes)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if liste_problemes[j][1] < liste_problemes[j+1][1]:
+                liste_problemes[j], liste_problemes[j+1] = liste_problemes[j+1], liste_problemes[j]
+
+    frequence_problemes = dict(liste_problemes)
     
     return frequence_problemes
 
@@ -98,6 +130,29 @@ def generer_rapport_satisfaction(categories, frequence_problemes):
     # TODO: Calculer la satisfaction moyenne
     # Calculer la distribution (% positifs, neutres, négatifs)
     # Identifier les 3 principaux points d'amélioration (les 3 problèmes les plus fréquents)
+
+    total_commentaires = sum(len(v) for v in categories.values())
+
+    if total_commentaires > 0:
+        score = (
+            len(categories.get('positifs', [])) * 5 +
+            len(categories.get('neutres', [])) * 3 +
+            len(categories.get('negatifs', [])) * 1
+        )
+        rapport['satisfaction_moyenne'] = round(score / total_commentaires, 2)
+
+    for cle in ['positif', 'neutre', 'negatif']:
+        count = len(categories.get(cle, []))
+        pourcentage = (count / total_commentaires * 100) if total_commentaires > 0 else 0
+        rapport['distribution'][cle] = round(pourcentage, 1)
+
+    if len(categories.get('positif', [])) > len(categories.get('negatif', [])):
+        rapport['points_forts'] = ['Service apprécié', 'Qualité reconnue']
+    else:
+        rapport['points_forts'] = []
+
+    cles = list(frequence_problemes.keys())
+    rapport["points_amelioration"] = cles[:3]
     
     return rapport
 
@@ -118,6 +173,25 @@ def calculer_tendance(historique_scores):
     # Si augmentation constante: 'amélioration'
     # Si diminution constante: 'dégradation'
     # Sinon: 'stable'
+
+    scores = [score for _, score in historique_scores]
+    tendance = None
+
+    for i in range(len(scores)-1):
+        diff = scores[i+1] - scores[i]
+
+        if diff > 0:
+            if tendance is None:
+                tendance = 'amélioration'
+            elif tendance != 'amélioration':
+                return 'stable'
+        elif diff < 0:
+            if tendance is None:
+                tendance = 'dégradation'
+            elif tendance != 'dégradation':
+                return 'stable'
+        elif diff == 0:
+            return 'stable'
     
     return tendance
 

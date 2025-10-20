@@ -172,9 +172,9 @@ def generer_rapport_occupation(salle):
         for colonne in rangee:
             if str(colonne).startswith("L"):
                 rapport[f"tables_libres_{colonne[1]}"] += 1
-            if str(colonne).startswith("R"):
+            elif str(colonne).startswith("R"):
                 rapport[f"tables_reservees_{colonne[1]}"] += 1
-            if str(colonne).startswith("O"):
+            elif str(colonne).startswith("O"):
                 rapport[f"tables_occupees_{colonne[1]}"] += 1
 
     total_tables = (
